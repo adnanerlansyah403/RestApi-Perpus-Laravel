@@ -43,8 +43,8 @@ Route::prefix("/authors")
     // Route::get("/", [AuthorController::class, "create"])->name("create");
     Route::post("/store", [AuthorController::class, "store"])->name("store");
     Route::get("/{id}", [AuthorController::class, "show"])->name("show");
-    Route::post("/{id}", [AuthorController::class, "update"])->name("update");
-    Route::post("/{id}", [AuthorController::class, "destroy"])->name("destroy");
+    Route::post("/{id}/update", [AuthorController::class, "update"])->name("update");
+    Route::post("/{id}/destroy", [AuthorController::class, "destroy"])->name("destroy");
 
 });
 

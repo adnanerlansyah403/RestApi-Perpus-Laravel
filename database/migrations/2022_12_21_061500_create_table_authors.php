@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum("gender", ["L", "P"]);
             $table->date("birthdate");
             $table->text("bio")->nullable();
+            $table->string("photo")->nullable();
+            $table->string("photo_path")->nullable();
             $table->timestamps();
         });
     }

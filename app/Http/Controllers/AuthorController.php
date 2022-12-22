@@ -6,6 +6,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AuthorController extends Controller
 {
@@ -36,6 +37,25 @@ class AuthorController extends Controller
     {
 
         $payload = $request->all();
+        // dd($payload);
+
+        $validation = Validator::make($request->all(), [
+            'name' =>'required|max:255',
+            'email' =>'required|email|max:255',
+            'gender' => 'required',
+            'birthday' =>'required|date',
+            'bio' => 'required',
+            'photo' => 'nullable',
+        ]);
+        
+        if($validation->fails()) {
+            return response()->json($validation->errors(), 400);
+        }
+
+        if($request->hasFile("photo")) {
+            $payload['photo'] = $request->file("photo")->getClientOriginalName();
+            $payload['photo_path'] = 'storage/' . $request->file("photo")->store("images_author", "public");
+        }
 
         $author = Author::query()->create($payload);
 
@@ -49,9 +69,29 @@ class AuthorController extends Controller
 
     public function update(Request $request, $id) 
     {
-        $author = Author::query()->findOrFail($id);
-
+        
         $payload = $request->all();
+        
+        $validation = Validator::make($request->all(), [
+            'name' =>'required|max:255',
+            'email' =>'required|email|max:255',
+            'gender' => 'required',
+            'birthday' =>'required|date',
+            'bio' => 'required',
+            'photo' => 'nullable',
+        ]);
+
+        if($validation->fails()) {
+            return response()->json($validation->errors(), 400);
+        }
+        
+        $author = Author::query()->findOrFail($id);
+        
+        if($request->hasFile("photo")) {
+            file_exists($author->photo_path) ? unlink(public_path($author->photo_path)) : false;
+            $payload['photo'] = file_exists($author->photo_path) ? $author->photo : $request->file("photo")->getClientOriginalName();
+            $payload['photo_path'] = file_exists($author->photo_path) ? $author->photo_path : 'storage/' . $request->file("photo")->store("images_author", "public");
+        }
 
         $author->update($payload);
 
@@ -70,8 +110,15 @@ class AuthorController extends Controller
         $books = Book::query()->get();
 
         foreach ($books as $book) {
+            file_exists($book->cover_path) ? 
+            unlink(public_path($book->cover_path)) :
+            false;
             $book->where("author_id", $author->id)->delete();
         }
+
+        file_exists($author->photo_path) ? 
+        unlink(public_path($author->photo_path)) :
+        false;
 
         $author->delete();
 
