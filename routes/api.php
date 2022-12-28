@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
@@ -17,13 +18,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::post("/login", [AuthController::class, "index"])->name("login");
+Route::get("/users", [AuthController::class, "getUser"])->middleware("auth:sanctum");
 
 
 Route::prefix("/categories")
     ->name("categories.")
+    ->middleware("auth:sanctum")
     ->group(function () {
 
     Route::get("/", [CategoryController::class, "index"])->name("index");
@@ -37,6 +42,7 @@ Route::prefix("/categories")
 
 Route::prefix("/authors")
     ->name("authors.")
+    ->middleware("auth:sanctum")
     ->group(function () {
 
     Route::get("/", [AuthorController::class, "index"])->name("index");
@@ -50,6 +56,7 @@ Route::prefix("/authors")
 
 Route::prefix("/books")
     ->name("books.")
+    ->middleware("auth:sanctum")
     ->group(function () {
 
     Route::get("/", [BookController::class, "index"])->name("index");

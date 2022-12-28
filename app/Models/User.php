@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -41,4 +42,24 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    protected static function boot()
+    {
+        parent::boot();
+
+        // mendefinisikan fungsi ketika akan di simpan ke dalam database
+        static::creating(function($user) {
+            // meng hash password ketika sedang membuat user / save ke database
+            $hash = Hash::make($user->password);
+            $user->password = $hash;
+        });
+
+        self::updating(function($user) {
+            // meng hash kembali apabila terdapat perubahan pada password 
+            if($user->isDirty(["password"])) {
+                $hash = Hash::make($user->password);
+                $user->password = $hash;
+            }
+        });
+    }
 }
